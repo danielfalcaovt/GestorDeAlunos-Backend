@@ -5,7 +5,7 @@ const getStudents = async (req, res) => {
     const studentsDatabase = await query("SELECT * FROM students");
     console.log(req.usuario);
     if (studentsDatabase.rowCount > 0){
-      const allStudents = studentsDatabase.rows[0];
+      const allStudents = studentsDatabase.rows;
       return res
       .status(200)
       .json({students:allStudents});
