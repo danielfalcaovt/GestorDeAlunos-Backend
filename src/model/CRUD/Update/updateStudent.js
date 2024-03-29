@@ -3,6 +3,7 @@ import { query } from "../../dbConnection.js";
 async function updateStudent(req, res) {
   try {
     const {
+      student_id,
       first_name,
       last_name,
       cpf,
@@ -10,53 +11,96 @@ async function updateStudent(req, res) {
       address,
       cep,
       email,
-      parent
+      parent,
+      phone
     } = req.body;
-    if(!checkIfRequiredParams(first_name, last_name, cpf)){
+    if(!checkIfRequiredParams(student_id)){
       return res
       .status(404)
       .json({error: "Parâmetros obrigatórios devem ser preenchidos."})
     };
-    let paramCount = 4;
-    let params = `first_name = $1, last_name = $2, cpf = $3`;
-    let paramsName = ["first_name", "last_name", "cpf"];
-    let passedParams = [first_name, last_name, cpf];
-    if (module) {
-      paramsName.push("module");
-      params += `, ${paramsName[paramCount -1]} = $${paramCount}`;
+    let paramCount = 2;
+    let params = `student_id = $1`;
+    let paramsName = ["student_id"];
+    let passedParams = [student_id];
+    
+    if (first_name) {
+      paramsName.push("first_name");
+      params += `, first_name = $${paramCount}`;
       paramCount++
-      passedParams.push(module);
+      passedParams.push(first_name);
+    }
+    if (last_name) {
+      paramsName.push("last_name");
+      params += `, last_name = $${paramCount}`;
+      paramCount++
+      passedParams.push(last_name);
+    }
+    if (cpf) {
+      paramsName.push("cpf");
+      params += `, cpf = $${paramCount}`;
+      paramCount++
+      passedParams.push(cpf);
+    }
+    if (module) {
+      let moduleToSend;
+      switch (module) {
+        case "B":
+          moduleToSend = "Básico";
+          break;
+        case "I":
+          moduleToSend = "Intermediário";
+          break;
+        case "P":
+          moduleToSend = "Pré - Intermediário";
+          break;
+        case "A":
+          moduleToSend = "Avançado";
+          break;
+        default:
+          moduleToSend = module;
+          break;
+      }
+      paramsName.push("module");
+      params += `, module = $${paramCount}`;
+      paramCount++
+      passedParams.push(moduleToSend);
     }
     if (address) {
       paramsName.push("address");
-      params += `, ${paramsName[paramCount -1]} = $${paramCount}`;
+      params += `, address = $${paramCount}`;
       paramCount++
       passedParams.push(address);
     }
     if (cep) {
       paramsName.push("cep");
-      params += `, ${paramsName[paramCount -1]} = $${paramCount}`;
+      params += `, cep = $${paramCount}`;
       paramCount++
       passedParams.push(cep);
     }
     if (email) {
       paramsName.push("email");
-      params += `, ${paramsName[paramCount -1]} = $${paramCount}`;
+      params += `, email = $${paramCount}`;
       paramCount++
       passedParams.push(email);
     }
     if (parent) {
+      console.log(parent);
       paramsName.push("parent");
-      params += `, ${paramsName[paramCount -1]} = $${paramCount}`;
+      params += `, parent = $${paramCount}`;
       paramCount++
       passedParams.push(parent);
     }
-    console.log(params);
-    const checkIfStudentAlreadyExist = await query("SELECT * FROM students WHERE cpf = $1", [cpf]);
+    if (phone) {
+      paramsName.push("phone");
+      params += `, phone = $${paramCount}`;
+      paramCount++;
+      passedParams.push(phone);
+    }
+    const checkIfStudentAlreadyExist = await query("SELECT * FROM students WHERE student_id::text = $1", [student_id]);
     if (checkIfStudentAlreadyExist.rowCount > 0) {
       const targetStudent = checkIfStudentAlreadyExist.rows[0];
-      console.log(targetStudent.student_id);
-     const updatedStudent = await query(`UPDATE students SET ${params} WHERE student_id = '${targetStudent.student_id}' RETURNING *`, passedParams);
+     const updatedStudent = await query(`UPDATE students SET ${params} WHERE student_id = ($1)::uuid RETURNING *`, passedParams);
      if (updatedStudent.rowCount > 0) {
       const student = updatedStudent.rows[0];
 

@@ -12,7 +12,7 @@ const database = new pg.Client({
 database.connect();
 
 async function query(querySqlCode, dependencies) {
-  const databaseResponse = await database.query(querySqlCode,dependencies);
+  const databaseResponse = await database.query(querySqlCode, dependencies);
   return databaseResponse;
 };
 

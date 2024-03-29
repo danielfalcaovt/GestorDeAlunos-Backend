@@ -3,26 +3,52 @@ import axios from "axios";
 
 async function registerStudent(req, res) {
   try {
-  const {
-    first_name,
-    last_name,
-    cpf,
-    module,
-    address,
-    cep,
-    email,
-    parent_name,
-    phone
-  } = req.body;
+    const identificadorDoRegistrador = req.usuario.username;
+    const {
+      first_name,
+      last_name,
+      cpf,
+      module,
+      address,
+      cep,
+      email,
+      parent_name,
+      phone,
+    } = req.body;
     if (missingRequiredParams(first_name, last_name, cpf, module)) {
       return res
         .status(404)
         .json({ error: "Preencha os campos obrigatórios." });
     }
-    let paramIndex = 5;
-    let paramIndexes = "$1, $2, $3, $4";
-    let paramsNameToInsert = "first_name, last_name, cpf, module";
-    let receivedParameters = [first_name, last_name, cpf, module];
+    let paramIndex = 6;
+    let paramIndexes = "$1, $2, $3, $4, $5";
+    let paramsNameToInsert = "cadastrador, first_name, last_name, cpf, module";
+    let moduleToSend;
+    switch (module) {
+      case "B":
+        moduleToSend = "Básico";
+        break;
+      case "I":
+        moduleToSend = "Intermediário";
+        break;
+      case "P":
+        moduleToSend = "Pré - Intermediário";
+        break;
+      case "A":
+        moduleToSend = "Avançado";
+        break;
+      default:
+        moduleToSend = "Indefinido";
+        break;
+    }
+
+    let receivedParameters = [
+      identificadorDoRegistrador,
+      first_name,
+      last_name,
+      cpf,
+      moduleToSend,
+    ];
     if (address) {
       paramIndexes += addParamIndexToInsertInDatabase(paramIndex);
       paramsNameToInsert += addParamNameToInsertInDatabase("address");
@@ -40,7 +66,9 @@ async function registerStudent(req, res) {
       paramsNameToInsert += addParamNameToInsertInDatabase("email");
       paramIndex++;
       const validEmail = checkIfEmailIsValid(email);
-      validEmail ? receivedParameters.push(email) : receivedParameters.push("Email Inválido.");
+      validEmail
+        ? receivedParameters.push(email)
+        : receivedParameters.push("Email Inválido.");
     }
     if (parent_name) {
       paramIndexes += addParamIndexToInsertInDatabase(paramIndex);
@@ -58,14 +86,11 @@ async function registerStudent(req, res) {
     if (await checkIfStudentAlreadyExist(cpf)) {
       return res.status(404).json({ error: "Estudante já existente." });
     }
-    console.log(paramsNameToInsert);
-    console.log(receivedParameters);
     const newStudentResponse = await query(
       `INSERT INTO students(${paramsNameToInsert}) VALUES(${paramIndexes}) RETURNING *`,
       receivedParameters
-      );
-      if (newStudentResponse.rowCount > 0) {
-      console.log('...');
+    );
+    if (newStudentResponse.rowCount > 0) {
       const newStudent = newStudentResponse.rows[0];
       if (parent_name) {
         const parentResponse = await insertStudentParentInDatabase(
@@ -99,8 +124,8 @@ async function getAddressFromCep(cep) {
 }
 
 async function checkIfEmailIsValid(email) {
-    const emailRegex = /^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/gm;
-    return emailRegex.test(email);
+  const emailRegex = /^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/gm;
+  return emailRegex.test(email);
 }
 
 async function insertStudentParentInDatabase(parent_name, student_id) {
@@ -111,7 +136,6 @@ async function insertStudentParentInDatabase(parent_name, student_id) {
     );
     if (newStudentParentResponse.rowCount > 0) {
       const newStudentParent = newStudentParentResponse.rows[0];
-      console.log(newStudentParent);
       return newStudentParent;
     } else {
       return false;
