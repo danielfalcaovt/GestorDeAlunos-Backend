@@ -2,7 +2,7 @@ import { query } from "../../dbConnection.js";
 
 const getStudents = async (req, res) => {
   try {
-    const studentsDatabase = await query("SELECT * FROM students");
+    const studentsDatabase = await query("SELECT * FROM students ORDER BY first_name ASC");
     console.log(req.usuario);
     if (studentsDatabase.rowCount > 0){
       const allStudents = studentsDatabase.rows;
