@@ -4,15 +4,13 @@ import jwt from "jsonwebtoken";
 
 async function UserRegister(req, res) {
   try {
-    const { username, email, confirmEmail, password, confirmPassword } =
-      req.body;
+    const { username, email, confirmEmail, password, confirmPassword } = req.body;
 
     if (checkParams(username, email, confirmEmail, password, confirmPassword) === false) {
       return res.status(404).json({ error: "Email e/ou senha inválidos." });
     };
-
     if (await userAlreadyExist(email)) {
-      return res.status(404).json({ error: "Email e/ou senha inválidos." });
+      return res.status(404).json({ error: "Usuario já existente." });
     };
 
     bcrypt.hash(password, 10, async (err, hashedPassword)  =>{
@@ -67,8 +65,10 @@ async function userAlreadyExist(email) {
   try {
     const checkUser = await query("SELECT * FROM users WHERE email = $1", [email,]);
     if (checkUser.rows.length > 0) {
+      console.log('?');
       return true;
     } else {
+      console.log('ue');
       return false;
     }
   } catch (error) {

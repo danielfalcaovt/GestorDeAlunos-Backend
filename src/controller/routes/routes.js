@@ -21,7 +21,7 @@ routes.post("/api/search", getSpecificStudent);
 
 routes.post("/api/register", registerStudent);
 
-routes.delete("/api/delete", deleteStudent);
+routes.delete("/api/delete/:cpf", deleteStudent);
 
 routes.patch("/api/update", updateStudent);
 

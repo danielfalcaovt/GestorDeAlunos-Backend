@@ -5,12 +5,13 @@ import env from "dotenv/config";
 
 async function UserLogin(req, res) {
   try {
-    const { username, password } = req.body;
-    if (checkParams(username, password) === false){
+    const { email, password } = req.body;
+    console.log(req.body);
+    if (!checkParams(email, password)){
       return res.status(404).json({error: "Preencha todos os campos obrigatórios."});
     };
 
-    const userInDatabase = await checkIfUserExist(username);
+    const userInDatabase = await checkIfUserExist(email);
     if (userInDatabase) {
       bcrypt.compare(password, userInDatabase.password, (err, check)=>{
         if (err){
@@ -49,18 +50,18 @@ async function UserLogin(req, res) {
   };
 };
 
-function checkParams(username, password) {
-  if (username && password) {
+function checkParams(email, password) {
+  if (email && password) {
     return true;
   } else {
     return false;
   };
 };
 
-async function checkIfUserExist(username) {
+async function checkIfUserExist(email) {
   try {
-    const lowerCaseUsername = username.toLowerCase();
-    const checkedUser = await query("SELECT * FROM users WHERE LOWER(username) = $1", [lowerCaseUsername]);
+    const lowerCaseemail = email.toLowerCase();
+    const checkedUser = await query("SELECT * FROM users WHERE LOWER(email) = $1", [lowerCaseemail]);
     if (checkedUser.rowCount > 0) {
       return checkedUser.rows[0];
     }else{
