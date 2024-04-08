@@ -102,7 +102,12 @@ async function updateStudent(req, res) {
       [student_id]
     );
     if (checkIfStudentAlreadyExist.rowCount > 0) {
-      const targetStudent = checkIfStudentAlreadyExist.rows[0];
+      const checkIfAlreadyRegisteredCpf = await query("SELECT * FROM students WHERE cpf = $1 AND student_id <> $2", [cpf, student_id]);
+      if (checkIfAlreadyRegisteredCpf.rowCount > 0) {
+        return res
+        .status(404)
+        .json({ error: "CPF já registrado." });
+      }
       const updatedStudent = await query(
         `UPDATE students SET ${params} WHERE student_id = ($1)::uuid RETURNING *`,
         passedParams

@@ -12,7 +12,7 @@ async function registerStudent(req, res) {
       address,
       cep,
       email,
-      parent_name,
+      parent,
       phone,
     } = req.body;
     if (missingRequiredParams(first_name, last_name, cpf, module)) {
@@ -41,7 +41,7 @@ async function registerStudent(req, res) {
         moduleToSend = "Indefinido";
         break;
     }
-
+    console.log(cpf);
     let receivedParameters = [
       identificadorDoRegistrador,
       first_name,
@@ -70,11 +70,11 @@ async function registerStudent(req, res) {
         ? receivedParameters.push(email)
         : receivedParameters.push("Email Inválido.");
     }
-    if (parent_name) {
+    if (parent) {
       paramIndexes += addParamIndexToInsertInDatabase(paramIndex);
       paramsNameToInsert += addParamNameToInsertInDatabase("parent");
       paramIndex++;
-      receivedParameters.push(parent_name);
+      receivedParameters.push(parent);
     }
     if (phone) {
       paramIndexes += addParamIndexToInsertInDatabase(paramIndex);
@@ -92,9 +92,9 @@ async function registerStudent(req, res) {
     );
     if (newStudentResponse.rowCount > 0) {
       const newStudent = newStudentResponse.rows[0];
-      if (parent_name) {
+      if (parent) {
         const parentResponse = await insertStudentParentInDatabase(
-          parent_name,
+          parent,
           newStudent.student_id
         );
         if (!parentResponse) {
@@ -106,20 +106,8 @@ async function registerStudent(req, res) {
       return res.status(500).json({ error: "Erro no servidor interno." });
     }
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ error: error });
-  }
-}
-
-async function getAddressFromCep(cep) {
-  try {
-    const address = await axios.get(`viacep.com.br/ws/${cep}/json/`);
-    if (address) {
-      return address;
-    } else {
-      return cep;
-    }
-  } catch (error) {
-    return "CEP Inválido";
   }
 }
 
@@ -128,11 +116,11 @@ async function checkIfEmailIsValid(email) {
   return emailRegex.test(email);
 }
 
-async function insertStudentParentInDatabase(parent_name, student_id) {
+async function insertStudentParentInDatabase(parent, student_id) {
   try {
     const newStudentParentResponse = await query(
       "INSERT INTO parent(student_id, name) VALUES($1,$2) RETURNING *",
-      [student_id, parent_name]
+      [student_id, parent]
     );
     if (newStudentParentResponse.rowCount > 0) {
       const newStudentParent = newStudentParentResponse.rows[0];
@@ -145,7 +133,7 @@ async function insertStudentParentInDatabase(parent_name, student_id) {
   }
 }
 
-async function checkIfStudentAlreadyExist(cpf) {
+export async function checkIfStudentAlreadyExist(cpf) {
   try {
     const studentCpfDatabaseResponse = await query(
       "SELECT * FROM students WHERE cpf = $1",

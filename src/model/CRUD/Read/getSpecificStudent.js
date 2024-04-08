@@ -1,21 +1,23 @@
 import { query } from "../../dbConnection.js";
 
 function getStudentInfo(req) {
-  const { first_name, cpf, module } = req.body;
+  const { first_name, cpf, module, parent } = req.body;
   const studentFirstName = first_name.toLowerCase();
   const studentModule = module.trim();
   const studentCPF = cpf.trim();
+  const studentParent = parent.trim();
   return {
     studentFirstName,
     studentModule,
     studentCPF,
+    studentParent
   };
 }
 
 const getSpecificStudent = async (req, res) => {
   try {
     const studentInfos = getStudentInfo(req);
-    if(!studentInfos.studentCPF && !studentInfos.studentFirstName && studentInfos.studentModule === "Desconhecido") {
+    if(!studentInfos.studentCPF && !studentInfos.studentFirstName && studentInfos.studentModule === "Desconhecido" && !studentInfos.studentParent) {
       return res
       .status(404)
       .json({error: "Parâmetros obrigatórios devem ser preenchidos."})
@@ -37,19 +39,20 @@ const getSpecificStudent = async (req, res) => {
       passedParams.push(studentInfos.studentCPF);
     }
     if (studentInfos.studentModule) {
-      console.log(studentInfos.studentModule);
       if (studentInfos.studentModule !== "Desconhecido") {
-        console.log('MANO.');
         paramCount > 1 ? params += " AND " : "";
         params += `module = $${paramCount}`;
         paramCount++
         passedParams.push(studentInfos.studentModule);
       }
     }
-    console.log(params);
-    console.log(passedParams);
+    if (studentInfos.studentParent) {
+      paramCount > 1 ? params += " AND " : "";
+      params += `parent = $${paramCount}`;
+      paramCount++;
+      passedParams.push(studentInfos.studentParent);
+    }
     const checkIfStudentAlreadyExist = await query(`SELECT * FROM students WHERE ${params}`, passedParams);
-    console.log(checkIfStudentAlreadyExist.rows);
     if (checkIfStudentAlreadyExist.rows.length > 0) {
       res.status(200).json({students: checkIfStudentAlreadyExist.rows});
     }else {
