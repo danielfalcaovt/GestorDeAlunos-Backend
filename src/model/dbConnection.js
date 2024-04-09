@@ -1,5 +1,6 @@
-import pg from "pg";
-import env from "dotenv/config.js";
+/* eslint-disable no-unused-vars */
+import pg from 'pg'
+import env from 'dotenv/config.js'
 
 const database = new pg.Client({
   host: process.env.PG_HOST,
@@ -7,16 +8,13 @@ const database = new pg.Client({
   database: process.env.PG_DATABASE,
   user: process.env.PG_USER,
   password: process.env.PG_PASSWORD
-});
+})
 
-database.connect();
+database.connect()
 
-async function query(querySqlCode, dependencies) {
-  const databaseResponse = await database.query(querySqlCode, dependencies);
-  return databaseResponse;
-};
+async function query (querySqlCode, dependencies) {
+  const databaseResponse = await database.query(querySqlCode, dependencies)
+  return databaseResponse
+}
 
-export {
-  database,
-  query
-};
+export { database, query }
