@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken'
 import { query } from '../../dbConnection.js'
+import 'dotenv/config'
 
 async function verifyLogin (req, res, next) {
   try {
     const { authorization } = req.headers
-    console.log(authorization)
     if (!authorization) {
       return res.status(402).json({ error: 'Usuário não autênticado.' })
     }
@@ -15,7 +15,6 @@ async function verifyLogin (req, res, next) {
     const userDatabaseResponse = await getUser(id)
     if (userDatabaseResponse) {
       const { password: _, ...usuario } = userDatabaseResponse
-      console.log(usuario)
       req.usuario = usuario
       next()
     } else {

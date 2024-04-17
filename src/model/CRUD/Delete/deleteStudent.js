@@ -17,7 +17,6 @@ async function deleteStudent (req, res) {
           'DELETE FROM parent WHERE student_id = ($1)::uuid',
           [checkedUser.rows[0].student_id]
         )
-        console.log(deletedParent.rows)
         if (deletedParent.rowCount <= 0) {
           return res.status(500).json({ error: 'Erro interno do Servidor.' })
         }

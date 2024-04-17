@@ -6,11 +6,12 @@ import deleteStudent from '../../model/CRUD/Delete/deleteStudent.js'
 import updateStudent from '../../model/CRUD/Update/updateStudent.js'
 import UserRegister from '../../model/auth/UserRegister/UserRegister.js'
 import UserLogin from '../../model/auth/UserLogin/UserLogin.js'
-import verifyLogin from '../../model/auth/filtro/verifyLogin.js'
+import verifyLogin from '../../model/auth/filter/verifyLogin.js'
 
 const routes = Router()
 
 routes.post('/register', UserRegister)
+
 routes.post('/login', UserLogin)
 
 routes.use(verifyLogin)

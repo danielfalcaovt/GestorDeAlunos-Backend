@@ -67,10 +67,8 @@ async function userAlreadyExist (email) {
       email
     ])
     if (checkUser.rows.length > 0) {
-      console.log('?')
       return true
     } else {
-      console.log('ue')
       return false
     }
   } catch (error) {

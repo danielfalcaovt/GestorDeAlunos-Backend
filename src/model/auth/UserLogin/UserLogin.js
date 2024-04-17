@@ -2,12 +2,11 @@
 import bcrypt from 'bcryptjs'
 import { query } from '../../dbConnection.js'
 import jwt from 'jsonwebtoken'
-import env from 'dotenv/config'
+import 'dotenv/config'
 
 async function UserLogin (req, res) {
   try {
     const { email, password } = req.body
-    console.log(req.body)
     if (!checkParams(email, password)) {
       return res
         .status(404)

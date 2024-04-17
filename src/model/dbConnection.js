@@ -3,11 +3,11 @@ import pg from 'pg'
 import env from 'dotenv/config.js'
 
 const database = new pg.Client({
-  host: process.env.PG_HOST,
-  port: process.env.PG_PORT,
-  database: process.env.PG_DATABASE,
-  user: process.env.PG_USER,
-  password: process.env.PG_PASSWORD
+  host: 'localhost',
+  port: 5432,
+  database: 'EnglishFaster',
+  user: 'postgres',
+  password: 'brbr109br'
 })
 
 database.connect()
